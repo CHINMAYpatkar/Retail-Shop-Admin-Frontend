@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-paper-200;
+  }
+  body {
+    @apply bg-paper-50 text-ink-900 antialiased;
+    font-feature-settings: 'ss01' on, 'ss02' on;
+  }
+  ::selection {
+    background-color: theme('colors.gold.200');
+  }
+  /* Numeric/data columns get the mono face + tabular figures */
+  .font-data {
+    font-family: var(--font-mono);
+    font-feature-settings: 'tnum' on;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: theme('colors.ink.300');
+    border-radius: 999px;
+  }
+}
