@@ -80,7 +80,7 @@ function RoleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent title={isEdit ? 'Edit role' : 'New role'} description="Roles bundle permissions for a group of admin users." className="max-w-2xl">
+      <DialogContent title={isEdit ? 'Edit role' : 'New role'} description="Roles bundle permissions for a group of admin users." className="max-w-2xl overflow-y-hidden">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <FormField label="Role name" htmlFor="name" error={errors.name?.message} required>
