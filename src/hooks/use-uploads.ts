@@ -26,8 +26,9 @@ export function useUploadFile() {
       form.append('file', file);
       form.append('folder', folder);
 
-      // Content-Type is deliberately not set - the browser must generate the
-      // multipart boundary, and setting it by hand omits that.
+      // The api client's request interceptor strips its default JSON
+      // Content-Type for FormData, so the browser generates the multipart
+      // boundary. Do not set the header here.
       const uploaded = unwrap<UploadResult>(await api.post('/admin/uploads', form));
 
       const asset = unwrap<MediaAsset>(
