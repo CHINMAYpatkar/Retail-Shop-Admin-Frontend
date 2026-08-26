@@ -84,6 +84,17 @@ export default function ProductsPage() {
             ))}
           </SelectContent>
         </Select>
+
+        <label className="flex cursor-pointer select-none items-center gap-2 self-center text-sm text-ink-600">
+          <Checkbox
+            checked={showDeleted}
+            onCheckedChange={(value) => {
+              setShowDeleted(Boolean(value));
+              setPage(1);
+            }}
+          />
+          Show deleted
+        </label>
       </div>
 
       <Card>
