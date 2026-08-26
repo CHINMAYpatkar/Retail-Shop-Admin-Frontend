@@ -31,3 +31,39 @@ export function useUpsertSetting<T>() {
     onError: (error) => toast.error(getErrorMessage(error)),
   });
 }
+
+export interface SmtpStatus {
+  configured: boolean;
+  host?: string;
+  from?: string;
+}
+
+/**
+ * Reports whether SMTP verified at API boot.
+ *
+ * Worth surfacing because email is a hard dependency for customer access, not
+ * a nice-to-have: customers log in with an emailed OTP, so if SMTP is down
+ * nobody can sign in. Better to see that here than to learn it from a customer.
+ */
+export function useSmtpStatus() {
+  return useQuery({
+    queryKey: ['settings', 'smtp-status'],
+    queryFn: async () => unwrap<SmtpStatus>(await api.get('/admin/settings/system/smtp-status')),
+  });
+}
+
+export function useSendTestEmail() {
+  return useMutation({
+    mutationFn: async (to: string) =>
+      unwrap<{ success: boolean; error?: string }>(
+        await api.post('/admin/settings/system/test-email', { to }),
+      ),
+    onSuccess: (result) => {
+      // The endpoint reports delivery failure in the payload rather than
+      // throwing, so a 200 is not on its own proof the mail was sent.
+      if (result.success) toast.success('Test email sent - check the inbox');
+      else toast.error(result.error || 'Test email could not be sent');
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}

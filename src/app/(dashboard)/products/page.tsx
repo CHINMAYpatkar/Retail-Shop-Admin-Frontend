@@ -4,11 +4,12 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Boxes, Pencil, Trash2, RotateCcw } from 'lucide-react';
-import { useProducts, useDeleteProduct } from '@/hooks/use-products';
+import { useProducts, useDeleteProduct, useRestoreProduct } from '@/hooks/use-products';
 import { useCategories } from '@/hooks/use-categories';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -26,10 +27,18 @@ export default function ProductsPage() {
   const [search, setSearch] = React.useState('');
   const [categoryId, setCategoryId] = React.useState<string>('');
   const [deleteTarget, setDeleteTarget] = React.useState<Product | undefined>();
+  const [showDeleted, setShowDeleted] = React.useState(false);
 
   const { data: categories } = useCategories();
-  const { data, isLoading } = useProducts({ page, limit: 15, search: search || undefined, categoryId: categoryId || undefined });
+  const { data, isLoading } = useProducts({
+    page,
+    limit: 15,
+    search: search || undefined,
+    categoryId: categoryId || undefined,
+    onlyDeleted: showDeleted || undefined,
+  });
   const deleteProduct = useDeleteProduct();
+  const restoreProduct = useRestoreProduct();
 
   return (
     <div>
@@ -75,6 +84,17 @@ export default function ProductsPage() {
             ))}
           </SelectContent>
         </Select>
+
+        <label className="flex cursor-pointer select-none items-center gap-2 self-center text-sm text-ink-600">
+          <Checkbox
+            checked={showDeleted}
+            onCheckedChange={(value) => {
+              setShowDeleted(Boolean(value));
+              setPage(1);
+            }}
+          />
+          Deleted only
+        </label>
       </div>
 
       <Card>
@@ -133,7 +153,17 @@ export default function ProductsPage() {
                         <Button variant="ghost" size="icon" onClick={() => router.push(`/products/${product.id}`)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        {!product.deletedAt && (
+                        {product.deletedAt ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-xs"
+                            loading={restoreProduct.isPending}
+                            onClick={() => restoreProduct.mutate(product.id)}
+                          >
+                            <RotateCcw className="h-3.5 w-3.5" /> Restore
+                          </Button>
+                        ) : (
                           <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(product)}>
                             <Trash2 className="h-4 w-4 text-paprika-600" />
                           </Button>

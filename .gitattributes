@@ -1,0 +1,22 @@
+# Normalise text files to LF in the repository and the working tree.
+#
+# `core.autocrlf=true` on Windows rewrites files to CRLF on checkout, and
+# editing tools can reintroduce CRLF on save. Declaring LF here keeps the
+# repository consistent for every clone regardless of local git config, and
+# matches the backend repo.
+* text=auto eol=lf
+
+# Binary files must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.mp4 binary
+*.webm binary
+*.woff binary
+*.woff2 binary
+*.ttf binary

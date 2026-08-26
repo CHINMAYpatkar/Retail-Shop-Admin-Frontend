@@ -14,6 +14,10 @@ export interface ProductsQueryParams {
   search?: string;
   categoryId?: string;
   isActive?: boolean;
+  /** Include soft-deleted products alongside live ones. Admin-only. */
+  includeDeleted?: boolean;
+  /** Show ONLY soft-deleted products - the trash view. */
+  onlyDeleted?: boolean;
 }
 
 export function useProducts(params: ProductsQueryParams) {
@@ -66,6 +70,23 @@ export function useUpdateStock() {
       unwrap<Product>(await api.patch(`/admin/products/${id}/stock`, { stockQuantity })),
     onSuccess: () => {
       toast.success('Stock updated');
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  });
+}
+
+/**
+ * Undoes a soft delete. The backend refuses if the product's category was
+ * removed in the meantime, since a product needs a category to be listed -
+ * that error is surfaced to the admin as-is rather than being swallowed.
+ */
+export function useRestoreProduct() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => unwrap<Product>(await api.patch(`/admin/products/${id}/restore`)),
+    onSuccess: () => {
+      toast.success('Product restored');
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
     onError: (error) => toast.error(getErrorMessage(error)),
