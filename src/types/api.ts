@@ -407,3 +407,62 @@ export interface DashboardSummary {
   pendingReviewCount: number;
   openTicketCount: number;
 }
+
+// =========================================================
+// PROCUREMENT (back office) - SUPER_ADMIN / ADMIN only
+// =========================================================
+
+export interface Vendor {
+  id: string;
+  name: string;
+  contactPerson?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postalCode?: string | null;
+  gstin?: string | null;
+  notes?: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * One fixed unit per material - purchases, stock and consumption all use it.
+ * There is no conversion: a 5kg sack of a GRAM material is quantity 5000.
+ */
+export type MeasurementUnit = 'GRAM' | 'KILOGRAM' | 'MILLILITRE' | 'LITRE' | 'PIECE' | 'PACKET';
+
+export const MEASUREMENT_UNITS: { value: MeasurementUnit; label: string; short: string }[] = [
+  { value: 'GRAM', label: 'Grams (g)', short: 'g' },
+  { value: 'KILOGRAM', label: 'Kilograms (kg)', short: 'kg' },
+  { value: 'MILLILITRE', label: 'Millilitres (ml)', short: 'ml' },
+  { value: 'LITRE', label: 'Litres (L)', short: 'L' },
+  { value: 'PIECE', label: 'Pieces', short: 'pc' },
+  { value: 'PACKET', label: 'Packets', short: 'pkt' },
+];
+
+export function unitShortLabel(unit: MeasurementUnit): string {
+  return MEASUREMENT_UNITS.find((u) => u.value === unit)?.short ?? unit;
+}
+
+export interface RawMaterial {
+  id: string;
+  name: string;
+  code?: string | null;
+  baseUnit: MeasurementUnit;
+  /** Decimal from the API - arrives as a string to preserve precision. */
+  stockQuantity: string;
+  reorderLevel?: string | null;
+  avgCostPerUnit?: string | null;
+  lastPurchasePrice?: string | null;
+  ingredientId?: string | null;
+  ingredient?: { id: string; name: string; slug: string } | null;
+  isActive: boolean;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

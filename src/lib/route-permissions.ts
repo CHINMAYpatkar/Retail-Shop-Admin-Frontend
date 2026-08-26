@@ -21,6 +21,10 @@ export const ROUTE_PERMISSIONS: RoutePermissionRule[] = [
   { prefix: '/products', permission: 'products.view' },
   { prefix: '/categories', permission: 'categories.view' },
   { prefix: '/ingredients', permission: 'ingredients.view' },
+  // Back office - role-restricted AND permission-gated, matching the backend
+  // controllers which apply @Roles(SUPER_ADMIN, ADMIN) as well as the key.
+  { prefix: '/vendors', permission: 'vendors.view', roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { prefix: '/raw-materials', permission: 'raw-materials.view', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { prefix: '/orders', permission: 'orders.view' },
   { prefix: '/reviews', permission: 'reviews.view' },
   { prefix: '/customers', permission: 'customers.view' },

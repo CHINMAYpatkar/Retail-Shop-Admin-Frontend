@@ -15,6 +15,12 @@ export const queryKeys = {
   permissions: ['permissions'] as const,
   adminUsers: ['admin-users'] as const,
 
+  // Back office (procurement)
+  vendors: (params?: object) => ['vendors', params] as const,
+  vendor: (id: string) => ['vendors', id] as const,
+  rawMaterials: (params?: object) => ['raw-materials', params] as const,
+  rawMaterial: (id: string) => ['raw-materials', id] as const,
+
   // Phase 2
   media: (params?: object) => ['media', params] as const,
   banners: ['banners'] as const,
