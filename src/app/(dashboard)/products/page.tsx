@@ -35,7 +35,7 @@ export default function ProductsPage() {
     limit: 15,
     search: search || undefined,
     categoryId: categoryId || undefined,
-    includeDeleted: showDeleted || undefined,
+    onlyDeleted: showDeleted || undefined,
   });
   const deleteProduct = useDeleteProduct();
   const restoreProduct = useRestoreProduct();
@@ -93,7 +93,7 @@ export default function ProductsPage() {
               setPage(1);
             }}
           />
-          Show deleted
+          Deleted only
         </label>
       </div>
 

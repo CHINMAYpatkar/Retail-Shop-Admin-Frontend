@@ -14,8 +14,10 @@ export interface ProductsQueryParams {
   search?: string;
   categoryId?: string;
   isActive?: boolean;
-  /** Include soft-deleted products. Admin-only; the storefront never sees them. */
+  /** Include soft-deleted products alongside live ones. Admin-only. */
   includeDeleted?: boolean;
+  /** Show ONLY soft-deleted products - the trash view. */
+  onlyDeleted?: boolean;
 }
 
 export function useProducts(params: ProductsQueryParams) {
