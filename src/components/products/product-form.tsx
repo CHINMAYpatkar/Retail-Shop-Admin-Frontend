@@ -16,6 +16,7 @@ import { FormField } from '@/components/ui/form-field';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FileUpload } from '@/components/ui/file-upload';
 import type { Product } from '@/types/api';
 
 function toDefaultValues(product?: Product): ProductFormValues {
@@ -192,16 +193,34 @@ export function ProductForm({ product }: { product?: Product }) {
         <CardContent className="space-y-3">
           {imagesArray.fields.length === 0 && <p className="text-sm text-ink-500">No images added yet.</p>}
           {imagesArray.fields.map((field, index) => (
-            <div key={field.id} className="flex items-end gap-2 rounded-md border border-paper-200 p-3">
-              <FormField label="Image URL" className="flex-1">
-                <Input placeholder="https://..." {...register(`images.${index}.url` as const)} />
+            <div key={field.id} className="flex items-start gap-3 rounded-md border border-paper-200 p-3">
+              <FormField label="Image" className="flex-1">
+                <Controller
+                  control={control}
+                  name={`images.${index}.url` as const}
+                  render={({ field: imageField }) => (
+                    <FileUpload
+                      value={imageField.value ?? ''}
+                      onChange={imageField.onChange}
+                      folder="products"
+                    />
+                  )}
+                />
               </FormField>
-              <FormField label="Alt text" className="flex-1">
-                <Input {...register(`images.${index}.altText` as const)} />
-              </FormField>
-              <Button type="button" variant="ghost" size="icon" onClick={() => imagesArray.remove(index)}>
-                <Trash2 className="h-4 w-4 text-paprika-600" />
-              </Button>
+              <div className="flex-1 space-y-2">
+                <FormField label="Alt text" hint="Describes the image for screen readers and SEO">
+                  <Input {...register(`images.${index}.altText` as const)} />
+                </FormField>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => imagesArray.remove(index)}
+                  className="gap-1.5 text-paprika-600"
+                >
+                  <Trash2 className="h-4 w-4" /> Remove image
+                </Button>
+              </div>
             </div>
           ))}
         </CardContent>

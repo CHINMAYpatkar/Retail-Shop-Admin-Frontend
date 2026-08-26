@@ -11,6 +11,18 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // FormData must NOT carry the instance's default `application/json`.
+  // A multipart body is only parseable with a boundary, and the browser only
+  // generates one when Content-Type is left unset. With the header forced to
+  // JSON the server cannot parse the body at all: multer finds no file, and the
+  // `file` field falls through to the validation pipe, which rejects it as
+  // "property file should not exist" - an error that points nowhere near the
+  // real cause. Deleting the header here fixes every multipart call at once.
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   return config;
 });
 

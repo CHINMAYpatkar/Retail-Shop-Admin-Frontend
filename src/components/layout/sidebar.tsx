@@ -21,6 +21,7 @@ import {
   FolderOpen,
   LifeBuoy,
   Settings as SettingsIcon,
+  Leaf,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
@@ -48,6 +49,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Products', href: '/products', icon: Boxes, permission: 'products.view' },
       { label: 'Categories', href: '/categories', icon: Tags, permission: 'categories.view' },
+      { label: 'Ingredients', href: '/ingredients', icon: Leaf, permission: 'ingredients.view' },
       { label: 'Recipes', href: '/recipes', icon: ChefHat, permission: 'recipes.view' },
     ],
   },

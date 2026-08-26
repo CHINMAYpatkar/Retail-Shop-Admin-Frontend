@@ -18,7 +18,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { PageSpinner } from '@/components/ui/spinner';
 import { Pagination } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { MediaAsset, MediaType } from '@/types/api';
+import { UPLOAD_FOLDERS, type MediaAsset, type MediaType, type UploadFolder } from '@/types/api';
 
 const addByUrlSchema = z.object({
   fileName: z.string().min(1, 'Give this asset a name'),
@@ -28,7 +28,10 @@ const addByUrlSchema = z.object({
 });
 type AddByUrlValues = z.infer<typeof addByUrlSchema>;
 
-const FOLDERS = ['products', 'banners', 'recipes', 'reviews', 'blogs', 'ingredients', 'categories', 'misc'];
+// Mirrors the backend's UPLOAD_FOLDERS allowlist. `bills` is excluded here on
+// purpose: those are private documents that belong to a purchase bill, not
+// loose assets to be dropped into the library by hand.
+const FOLDERS = UPLOAD_FOLDERS.filter((f) => f !== 'bills');
 
 function AddByUrlDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const addByUrl = useAddMediaByUrl();
@@ -122,20 +125,24 @@ function AddByUrlDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 function UploadDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const upload = useUploadMedia();
   const [file, setFile] = React.useState<File | null>(null);
-  const [folder, setFolder] = React.useState('misc');
+  const [folder, setFolder] = React.useState<UploadFolder>('misc');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         title="Upload from device"
-        description="Uploads directly to S3 via a presigned URL. Requires AWS credentials configured on the backend."
+        description="Images are converted to WebP and stripped of metadata. Max 5MB for images, 200MB for video."
       >
         <div className="space-y-4">
-          <FormField label="File">
-            <Input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+          <FormField label="File" hint="JPEG, PNG, WebP, AVIF, MP4, WebM or PDF">
+            <Input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,application/pdf"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
           </FormField>
           <FormField label="Folder">
-            <Select value={folder} onValueChange={setFolder}>
+            <Select value={folder} onValueChange={(v) => setFolder(v as UploadFolder)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -181,6 +188,12 @@ function UploadDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (op
 
 function AssetCard({ asset, onDelete }: { asset: MediaAsset; onDelete: () => void }) {
   const copyUrl = () => {
+    if (!asset.url) {
+      // Private assets (bill scans) have no public URL by design - they stream
+      // through an authenticated route instead.
+      toast.error('This asset is private and has no public URL');
+      return;
+    }
     navigator.clipboard.writeText(asset.url);
     toast.success('URL copied to clipboard');
   };
@@ -188,7 +201,7 @@ function AssetCard({ asset, onDelete }: { asset: MediaAsset; onDelete: () => voi
   return (
     <Card className="group relative overflow-hidden">
       <div className="aspect-square bg-paper-100">
-        {asset.type === 'IMAGE' ? (
+        {asset.type === 'IMAGE' && asset.url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={asset.url} alt={asset.fileName} className="h-full w-full object-cover" />
         ) : (
@@ -316,7 +329,9 @@ export default function MediaLibraryPage() {
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(undefined)}
         title="Delete asset?"
-        description={`"${deleteTarget?.fileName}" will be permanently removed${deleteTarget?.url.includes('amazonaws.com') ? ' from S3' : ''}.`}
+        description={`"${deleteTarget?.fileName}" will be permanently removed${
+          deleteTarget?.isUploaded ? ', including the stored file' : ' from the library (the external file is untouched)'
+        }.`}
         confirmLabel="Delete"
         destructive
         loading={deleteMedia.isPending}

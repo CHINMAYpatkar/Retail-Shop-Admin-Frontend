@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -80,8 +81,14 @@ export function RecipeForm({ recipe }: { recipe?: Recipe }) {
           <FormField label="Slug" htmlFor="slug" hint="Leave blank to auto-generate">
             <Input id="slug" {...register('slug')} />
           </FormField>
-          <FormField label="Image URL" htmlFor="imageUrl">
-            <Input id="imageUrl" placeholder="https://..." {...register('imageUrl')} />
+          <FormField label="Recipe image" htmlFor="imageUrl">
+            <Controller
+              control={control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FileUpload value={field.value ?? ''} onChange={field.onChange} folder="recipes" />
+              )}
+            />
           </FormField>
           <FormField label="Description" htmlFor="description" className="sm:col-span-2">
             <Textarea id="description" rows={3} {...register('description')} />
@@ -107,8 +114,25 @@ export function RecipeForm({ recipe }: { recipe?: Recipe }) {
               )}
             />
           </FormField>
-          <FormField label="Video URL" htmlFor="videoUrl" className="sm:col-span-2">
-            <Input id="videoUrl" placeholder="https://..." {...register('videoUrl')} />
+          <FormField
+            label="Recipe video"
+            htmlFor="videoUrl"
+            className="sm:col-span-2"
+            hint="MP4 or WebM, up to 200MB"
+          >
+            <Controller
+              control={control}
+              name="videoUrl"
+              render={({ field }) => (
+                <FileUpload
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  folder="recipes"
+                  variant="video"
+                  accept="video/mp4,video/webm"
+                />
+              )}
+            />
           </FormField>
         </CardContent>
       </Card>
@@ -136,7 +160,17 @@ export function RecipeForm({ recipe }: { recipe?: Recipe }) {
                 <div className="flex-1 space-y-2">
                   <Input placeholder="Step title" {...register(`steps.${index}.title` as const)} />
                   <Textarea rows={2} placeholder="Step description" {...register(`steps.${index}.description` as const)} />
-                  <Input placeholder="Step image URL (optional)" {...register(`steps.${index}.imageUrl` as const)} />
+                  <Controller
+                    control={control}
+                    name={`steps.${index}.imageUrl` as const}
+                    render={({ field: stepImage }) => (
+                      <FileUpload
+                        value={stepImage.value ?? ''}
+                        onChange={stepImage.onChange}
+                        folder="recipes"
+                      />
+                    )}
+                  />
                 </div>
                 <Button
                   type="button"
