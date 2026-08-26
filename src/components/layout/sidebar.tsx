@@ -22,6 +22,8 @@ import {
   LifeBuoy,
   Settings as SettingsIcon,
   Leaf,
+  Truck,
+  Package,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
@@ -69,6 +71,21 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Blogs', href: '/blogs', icon: Newspaper, permission: 'blogs.view' },
       { label: 'FAQs', href: '/faqs', icon: HelpCircle, permission: 'faqs.view' },
       { label: 'Media Library', href: '/media', icon: FolderOpen },
+    ],
+  },
+  {
+    // Back office. Role-restricted rather than permission-gated: supplier
+    // pricing and margins are not MANAGER or STAFF information, so the whole
+    // group is hidden for those roles.
+    label: 'Operations',
+    items: [
+      { label: 'Vendors', href: '/vendors', icon: Truck, roles: ['SUPER_ADMIN', 'ADMIN'] },
+      {
+        label: 'Raw Materials',
+        href: '/raw-materials',
+        icon: Package,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
     ],
   },
   {
