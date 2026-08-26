@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -84,8 +85,14 @@ function CategoryDialog({
           <FormField label="Description" htmlFor="description">
             <Textarea id="description" rows={3} {...register('description')} />
           </FormField>
-          <FormField label="Image URL" htmlFor="imageUrl">
-            <Input id="imageUrl" placeholder="https://..." {...register('imageUrl')} />
+          <FormField label="Image" htmlFor="imageUrl">
+            <Controller
+              control={control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FileUpload value={field.value ?? ''} onChange={field.onChange} folder="categories" />
+              )}
+            />
           </FormField>
           <div className="flex items-center gap-2">
             <Controller

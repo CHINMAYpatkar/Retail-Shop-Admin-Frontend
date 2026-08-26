@@ -10,6 +10,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/form-field';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 import { ConfirmDialog } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -120,8 +121,40 @@ function BannerDialog({
             <Input id="subtitle" {...register('subtitle')} />
           </FormField>
 
-          <FormField label="Image URL" htmlFor="imageUrl" error={errors.imageUrl?.message} required>
-            <Input id="imageUrl" placeholder="https://..." invalid={!!errors.imageUrl} {...register('imageUrl')} />
+          <FormField
+            label="Image"
+            htmlFor="imageUrl"
+            error={errors.imageUrl?.message}
+            required
+            hint="Shown on its own, and used as the poster frame if you add a video"
+          >
+            <Controller
+              control={control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FileUpload value={field.value ?? ''} onChange={field.onChange} folder="banners" />
+              )}
+            />
+          </FormField>
+
+          <FormField
+            label="Video (optional)"
+            htmlFor="videoUrl"
+            hint="Promo or advertisement clip. MP4 or WebM, up to 200MB."
+          >
+            <Controller
+              control={control}
+              name="videoUrl"
+              render={({ field }) => (
+                <FileUpload
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  folder="banners"
+                  variant="video"
+                  accept="video/mp4,video/webm"
+                />
+              )}
+            />
           </FormField>
 
           <div className="grid grid-cols-2 gap-4">

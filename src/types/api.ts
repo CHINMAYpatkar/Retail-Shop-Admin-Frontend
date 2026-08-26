@@ -204,13 +204,48 @@ export type MediaType = 'IMAGE' | 'VIDEO' | 'DOCUMENT';
 export interface MediaAsset {
   id: string;
   fileName: string;
-  url: string;
+  /** Resolved by the backend from storageKey. Null for private assets. */
+  url: string | null;
   type: MediaType;
   folder?: string | null;
   sizeBytes?: number | null;
   uploadedBy?: string | null;
   createdAt: string;
+  /** Driver-relative key. Null for assets added by external URL. */
+  storageKey?: string | null;
+  driver?: 'LOCAL' | 'S3' | null;
+  mimeType?: string | null;
+  /** True when we own the bytes (uploaded), false for an external link. */
+  isUploaded?: boolean;
+  /** True for assets with no public URL - they stream through /admin/documents/:id. */
+  isPrivate?: boolean;
 }
+
+/** Response from POST /admin/uploads - the raw stored file, before it is recorded. */
+export interface UploadResult {
+  storageKey: string;
+  url: string | null;
+  mimeType: string;
+  sizeBytes: number;
+  category: 'image' | 'video' | 'document';
+  mediaType: MediaType;
+  fileName: string;
+}
+
+/** Folders the backend accepts. Mirrors UPLOAD_FOLDERS in the API. */
+export const UPLOAD_FOLDERS = [
+  'products',
+  'categories',
+  'ingredients',
+  'recipes',
+  'banners',
+  'blogs',
+  'reviews',
+  'bills',
+  'misc',
+] as const;
+
+export type UploadFolder = (typeof UPLOAD_FOLDERS)[number];
 
 export type BannerPlacement = 'HOME_HERO' | 'HOME_OFFER' | 'CATEGORY' | 'SLIDER';
 
@@ -219,6 +254,7 @@ export interface Banner {
   title: string;
   subtitle?: string | null;
   imageUrl: string;
+  videoUrl?: string | null;
   ctaLabel?: string | null;
   ctaUrl?: string | null;
   placement: BannerPlacement;

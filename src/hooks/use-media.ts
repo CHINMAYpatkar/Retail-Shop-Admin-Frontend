@@ -15,12 +15,6 @@ export interface MediaQueryParams {
   folder?: string;
 }
 
-interface PresignResponse {
-  uploadUrl: string;
-  key: string;
-  publicUrl: string;
-}
-
 export function useMediaAssets(params: MediaQueryParams) {
   return useQuery({
     queryKey: queryKeys.media(params),
@@ -29,7 +23,7 @@ export function useMediaAssets(params: MediaQueryParams) {
   });
 }
 
-/** Registers a media asset the admin already has a URL for (no S3 upload needed). */
+/** Registers an externally-hosted asset by URL - nothing is uploaded. */
 export function useAddMediaByUrl() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -43,37 +37,14 @@ export function useAddMediaByUrl() {
   });
 }
 
-/** Full presign -> PUT to S3 -> record flow. Requires real AWS credentials on the backend. */
-export function useUploadMedia() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ file, folder }: { file: File; folder: string }) => {
-      const { uploadUrl, publicUrl, key } = unwrap<PresignResponse>(
-        await api.post('/admin/uploads/presign', { fileName: file.name, contentType: file.type, folder }),
-      );
-
-      await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
-
-      const type: MediaType = file.type.startsWith('video') ? 'VIDEO' : file.type.startsWith('image') ? 'IMAGE' : 'DOCUMENT';
-
-      return unwrap<MediaAsset>(
-        await api.post('/admin/media', {
-          fileName: file.name,
-          url: publicUrl,
-          type,
-          folder,
-          sizeBytes: file.size,
-          key,
-        }),
-      );
-    },
-    onSuccess: () => {
-      toast.success('File uploaded');
-      queryClient.invalidateQueries({ queryKey: ['media'] });
-    },
-    onError: (error) => toast.error(getErrorMessage(error)),
-  });
-}
+/**
+ * Uploads a file through the API and records it in the library.
+ *
+ * The previous implementation presigned an S3 PUT and uploaded straight to the
+ * bucket. Storage is local disk now, so the bytes go through the API instead -
+ * see useUploadFile, which this delegates to.
+ */
+export { useUploadFile as useUploadMedia } from './use-uploads';
 
 export function useDeleteMedia() {
   const queryClient = useQueryClient();

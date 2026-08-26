@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { FormField } from '@/components/ui/form-field';
+import { FileUpload } from '@/components/ui/file-upload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Blog } from '@/types/api';
@@ -66,8 +67,14 @@ export function BlogForm({ blog }: { blog?: Blog }) {
           <FormField label="Slug" htmlFor="slug" hint="Leave blank to auto-generate">
             <Input id="slug" {...register('slug')} />
           </FormField>
-          <FormField label="Cover image URL" htmlFor="coverImageUrl">
-            <Input id="coverImageUrl" placeholder="https://..." {...register('coverImageUrl')} />
+          <FormField label="Cover image" htmlFor="coverImageUrl">
+            <Controller
+              control={control}
+              name="coverImageUrl"
+              render={({ field }) => (
+                <FileUpload value={field.value ?? ''} onChange={field.onChange} folder="blogs" />
+              )}
+            />
           </FormField>
           <FormField label="Excerpt" htmlFor="excerpt" className="sm:col-span-2" hint="Short summary shown in listings">
             <Textarea id="excerpt" rows={2} {...register('excerpt')} />
