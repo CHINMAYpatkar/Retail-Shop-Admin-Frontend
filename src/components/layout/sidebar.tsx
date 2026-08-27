@@ -26,6 +26,7 @@ import {
   Package,
   Receipt,
   Banknote,
+  TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
@@ -98,6 +99,12 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Vendor Payments',
         href: '/vendor-payments',
         icon: Banknote,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        label: 'Margins',
+        href: '/margins',
+        icon: TrendingUp,
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
     ],

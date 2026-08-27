@@ -574,3 +574,64 @@ export interface VendorLedger {
   payments: VendorPayment[];
   entries: VendorLedgerEntry[];
 }
+
+export interface ProductCostSheetItem {
+  id: string;
+  rawMaterialId: string;
+  quantity: string;
+  /** Frozen when the sheet was created - does not follow later material price changes. */
+  ratePerUnit: string;
+  lineCost: string;
+  notes?: string | null;
+  rawMaterial?: {
+    id: string;
+    name: string;
+    code?: string | null;
+    baseUnit: MeasurementUnit;
+    avgCostPerUnit?: string | null;
+  };
+}
+
+export interface ProductCostSheet {
+  id: string;
+  productId: string;
+  version: number;
+  effectiveFrom: string;
+  isActive: boolean;
+  batchYieldQuantity: number;
+  /** Computed server-side from the line items. */
+  materialCost: string;
+  labourCost: string;
+  packagingCost: string;
+  overheadCost: string;
+  otherCost: string;
+  totalBatchCost: string;
+  costPerUnit: string;
+  notes?: string | null;
+  items: ProductCostSheetItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MarginsReport {
+  costed: {
+    id: string;
+    name: string;
+    sku?: string | null;
+    isActive: boolean;
+    costSheetId: string;
+    costSheetVersion: number;
+    sellingPrice: string;
+    costPerUnit: string;
+    marginAmount: string;
+    /** Percentage of the selling price (gross margin). Null when price is zero. */
+    marginPercent: string | null;
+  }[];
+  uncosted: { id: string; name: string; sku?: string | null; price: string }[];
+  summary: {
+    productCount: number;
+    costedCount: number;
+    uncostedCount: number;
+    lossMakingCount: number;
+  };
+}

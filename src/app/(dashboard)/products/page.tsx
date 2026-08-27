@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus, Search, Boxes, Pencil, Trash2, RotateCcw } from 'lucide-react';
+import { Plus, Search, Boxes, Pencil, Trash2, RotateCcw, Calculator } from 'lucide-react';
 import { useProducts, useDeleteProduct, useRestoreProduct } from '@/hooks/use-products';
 import { useCategories } from '@/hooks/use-categories';
 import { PageHeader } from '@/components/ui/page-header';
@@ -150,6 +150,14 @@ export default function ProductsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Cost sheet and margin"
+                          onClick={() => router.push(`/products/${product.id}/costing`)}
+                        >
+                          <Calculator className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => router.push(`/products/${product.id}`)}>
                           <Pencil className="h-4 w-4" />
                         </Button>

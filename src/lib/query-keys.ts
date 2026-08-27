@@ -24,6 +24,8 @@ export const queryKeys = {
   purchaseBill: (id: string) => ['purchase-bills', id] as const,
   vendorPayments: (params?: object) => ['vendor-payments', params] as const,
   vendorLedger: (id: string) => ['vendor-ledger', id] as const,
+  costSheets: (productId: string) => ['cost-sheets', productId] as const,
+  margins: ['margins'] as const,
 
   // Phase 2
   media: (params?: object) => ['media', params] as const,
