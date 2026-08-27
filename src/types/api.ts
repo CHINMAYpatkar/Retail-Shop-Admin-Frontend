@@ -466,3 +466,56 @@ export interface RawMaterial {
   createdAt: string;
   updatedAt: string;
 }
+
+export type PurchaseBillStatus = 'UNPAID' | 'PARTIALLY_PAID' | 'PAID';
+
+export type PaymentMode = 'CASH' | 'BANK_TRANSFER' | 'UPI' | 'CHEQUE' | 'CARD' | 'OTHER';
+
+export const PAYMENT_MODES: { value: PaymentMode; label: string }[] = [
+  { value: 'CASH', label: 'Cash' },
+  { value: 'BANK_TRANSFER', label: 'Bank transfer' },
+  { value: 'UPI', label: 'UPI' },
+  { value: 'CHEQUE', label: 'Cheque' },
+  { value: 'CARD', label: 'Card' },
+  { value: 'OTHER', label: 'Other' },
+];
+
+export interface PurchaseBillItem {
+  id: string;
+  rawMaterialId: string;
+  /** Decimal from the API - a string, to preserve precision. */
+  quantity: string;
+  unitPrice: string;
+  lineTotal: string;
+  notes?: string | null;
+  rawMaterial?: {
+    id: string;
+    name: string;
+    code?: string | null;
+    baseUnit: MeasurementUnit;
+  };
+}
+
+export interface PurchaseBill {
+  id: string;
+  vendorId: string;
+  vendor?: { id: string; name: string };
+  billNumber: string;
+  billDate: string;
+  dueDate?: string | null;
+  subtotal: string;
+  taxAmount: string;
+  discountAmount: string;
+  totalAmount: string;
+  attachmentMediaId?: string | null;
+  notes?: string | null;
+  createdByAdminId?: string | null;
+  items: PurchaseBillItem[];
+  /** All three are derived server-side from linked payments, never stored. */
+  paidAmount: string;
+  outstandingAmount: string;
+  status: PurchaseBillStatus;
+  payments?: { id: string; amount: string; paidOn: string; method: PaymentMode }[];
+  createdAt: string;
+  updatedAt: string;
+}

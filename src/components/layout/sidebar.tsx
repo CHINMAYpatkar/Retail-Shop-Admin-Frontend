@@ -24,6 +24,7 @@ import {
   Leaf,
   Truck,
   Package,
+  Receipt,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
@@ -84,6 +85,12 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Raw Materials',
         href: '/raw-materials',
         icon: Package,
+        roles: ['SUPER_ADMIN', 'ADMIN'],
+      },
+      {
+        label: 'Purchase Bills',
+        href: '/purchase-bills',
+        icon: Receipt,
         roles: ['SUPER_ADMIN', 'ADMIN'],
       },
     ],

@@ -25,6 +25,7 @@ export const ROUTE_PERMISSIONS: RoutePermissionRule[] = [
   // controllers which apply @Roles(SUPER_ADMIN, ADMIN) as well as the key.
   { prefix: '/vendors', permission: 'vendors.view', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { prefix: '/raw-materials', permission: 'raw-materials.view', roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { prefix: '/purchase-bills', permission: 'purchase-bills.view', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { prefix: '/orders', permission: 'orders.view' },
   { prefix: '/reviews', permission: 'reviews.view' },
   { prefix: '/customers', permission: 'customers.view' },

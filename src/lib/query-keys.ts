@@ -20,6 +20,8 @@ export const queryKeys = {
   vendor: (id: string) => ['vendors', id] as const,
   rawMaterials: (params?: object) => ['raw-materials', params] as const,
   rawMaterial: (id: string) => ['raw-materials', id] as const,
+  purchaseBills: (params?: object) => ['purchase-bills', params] as const,
+  purchaseBill: (id: string) => ['purchase-bills', id] as const,
 
   // Phase 2
   media: (params?: object) => ['media', params] as const,
