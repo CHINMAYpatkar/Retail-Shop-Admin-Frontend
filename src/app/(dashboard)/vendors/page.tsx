@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Pencil, Trash2, Truck, Search } from 'lucide-react';
@@ -237,7 +238,14 @@ export default function VendorsPage() {
               <TableBody>
                 {data.items.map((vendor) => (
                   <TableRow key={vendor.id}>
-                    <TableCell className="font-medium text-ink-900">{vendor.name}</TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/vendors/${vendor.id}`}
+                        className="font-medium text-ink-900 hover:text-gold-700"
+                      >
+                        {vendor.name}
+                      </Link>
+                    </TableCell>
                     <TableCell className="text-sm text-ink-600">
                       {vendor.contactPerson || '-'}
                       {vendor.phone && (

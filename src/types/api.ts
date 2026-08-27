@@ -519,3 +519,58 @@ export interface PurchaseBill {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface VendorPayment {
+  id: string;
+  vendorId: string;
+  vendor?: { id: string; name: string };
+  /** Null for an on-account payment (an advance not tied to any bill). */
+  purchaseBillId?: string | null;
+  purchaseBill?: { id: string; billNumber: string; billDate: string; totalAmount: string } | null;
+  amount: string;
+  paidOn: string;
+  method: PaymentMode;
+  referenceNo?: string | null;
+  attachmentMediaId?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VendorLedgerEntry {
+  kind: 'BILL' | 'PAYMENT';
+  date: string;
+  reference: string;
+  billId?: string | null;
+  billNumber?: string | null;
+  debit: string;
+  credit: string;
+  /** Running balance owed to the vendor after this entry. */
+  balance: string;
+}
+
+export interface VendorLedger {
+  vendor: Vendor;
+  summary: {
+    totalBilled: string;
+    totalPaid: string;
+    /** Positive = owed to the vendor. Negative = they hold an advance. */
+    outstanding: string;
+    onAccount: string;
+    billCount: number;
+    unpaidBillCount: number;
+    oldestUnpaidBillDate?: string | null;
+  };
+  bills: {
+    id: string;
+    billNumber: string;
+    billDate: string;
+    dueDate?: string | null;
+    totalAmount: string;
+    paidAmount: string;
+    outstandingAmount: string;
+    status: PurchaseBillStatus;
+  }[];
+  payments: VendorPayment[];
+  entries: VendorLedgerEntry[];
+}
