@@ -79,6 +79,8 @@ export function PurchaseBillForm({ bill }: { bill?: PurchaseBill }) {
   // is a preview, never the source of truth.
   const watchedItems = useWatch({ control, name: 'items' });
   const watchedDiscount = useWatch({ control, name: 'discountAmount' });
+  // Drives the due-date input's `min`, so an earlier date cannot be picked at all.
+  const watchedBillDate = useWatch({ control, name: 'billDate' });
 
   const { subtotal, total } = React.useMemo(() => {
     const sub = (watchedItems ?? []).reduce((acc, item) => {
@@ -141,8 +143,21 @@ export function PurchaseBillForm({ bill }: { bill?: PurchaseBill }) {
             <Input id="billDate" type="date" invalid={!!errors.billDate} {...register('billDate')} />
           </FormField>
 
-          <FormField label="Due date" htmlFor="dueDate" hint="Optional">
-            <Input id="dueDate" type="date" {...register('dueDate')} />
+          <FormField
+            label="Due date"
+            htmlFor="dueDate"
+            error={errors.dueDate?.message}
+            hint="Optional. Cannot be before the bill date."
+          >
+            <Input
+              id="dueDate"
+              type="date"
+              // Blocks the invalid range in the picker itself, rather than only
+              // reporting it after the fact.
+              min={watchedBillDate || undefined}
+              invalid={!!errors.dueDate}
+              {...register('dueDate')}
+            />
           </FormField>
 
           <FormField label="Bill scan" className="sm:col-span-2">

@@ -28,7 +28,14 @@ export const purchaseBillSchema = z.object({
   notes: z.string().optional().or(z.literal('')),
   // At least one line: a bill with no lines is not a bill, and the API rejects it.
   items: z.array(purchaseBillItemSchema).min(1, 'Add at least one line item'),
-});
+})
+  // A bill cannot fall due before it was issued. Same-day is fine - payable on
+  // receipt is normal - so only strictly earlier is rejected. The API enforces
+  // this too; this exists so the error appears on the field, not as a toast.
+  .refine(
+    (values) => !values.dueDate || !values.billDate || values.dueDate >= values.billDate,
+    { message: 'Due date cannot be earlier than the bill date', path: ['dueDate'] },
+  );
 
 export type PurchaseBillFormValues = z.infer<typeof purchaseBillSchema>;
 export type PurchaseBillItemFormValues = z.infer<typeof purchaseBillItemSchema>;
