@@ -26,6 +26,9 @@ export const queryKeys = {
   vendorLedger: (id: string) => ['vendor-ledger', id] as const,
   costSheets: (productId: string) => ['cost-sheets', productId] as const,
   margins: ['margins'] as const,
+  expenses: (params?: object) => ['expenses', params] as const,
+  refunds: (params?: object) => ['refunds', params] as const,
+  orderRefunds: (orderId: string) => ['order-refunds', orderId] as const,
 
   // Phase 2
   media: (params?: object) => ['media', params] as const,

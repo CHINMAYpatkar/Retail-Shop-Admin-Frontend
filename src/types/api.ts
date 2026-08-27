@@ -635,3 +635,88 @@ export interface MarginsReport {
     lossMakingCount: number;
   };
 }
+
+export type ExpenseCategory =
+  | 'RENT'
+  | 'UTILITIES'
+  | 'SALARY'
+  | 'PACKAGING'
+  | 'TRANSPORT'
+  | 'MARKETING'
+  | 'EQUIPMENT'
+  | 'MAINTENANCE'
+  | 'MISC';
+
+export const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
+  { value: 'RENT', label: 'Rent' },
+  { value: 'UTILITIES', label: 'Utilities' },
+  { value: 'SALARY', label: 'Salary' },
+  { value: 'PACKAGING', label: 'Packaging' },
+  { value: 'TRANSPORT', label: 'Transport' },
+  { value: 'MARKETING', label: 'Marketing' },
+  { value: 'EQUIPMENT', label: 'Equipment' },
+  { value: 'MAINTENANCE', label: 'Maintenance' },
+  { value: 'MISC', label: 'Miscellaneous' },
+];
+
+export interface Expense {
+  id: string;
+  category: ExpenseCategory;
+  title: string;
+  amount: string;
+  spentOn: string;
+  method: PaymentMode;
+  vendorId?: string | null;
+  vendor?: { id: string; name: string } | null;
+  attachmentMediaId?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExpensesResponse extends PaginatedResponse<Expense> {
+  /** Covers the whole filtered set, not just the current page. */
+  summary: {
+    totalAmount: string;
+    byCategory: { category: ExpenseCategory; amount: string }[];
+  };
+}
+
+export type RefundStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
+
+export const REFUND_STATUSES: { value: RefundStatus; label: string }[] = [
+  { value: 'PENDING', label: 'Agreed, not yet sent' },
+  { value: 'COMPLETED', label: 'Money sent' },
+  { value: 'FAILED', label: 'Failed' },
+];
+
+export interface Refund {
+  id: string;
+  orderId: string;
+  order?: {
+    id: string;
+    orderNumber: string;
+    totalAmount: string;
+    status: OrderStatus;
+    paymentStatus: string;
+    customer?: { id: string; name?: string | null; email: string };
+  };
+  amount: string;
+  reason: string;
+  method: PaymentMode;
+  status: RefundStatus;
+  referenceNo?: string | null;
+  refundedOn?: string | null;
+  notes?: string | null;
+  processedByAdminId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RefundsResponse extends PaginatedResponse<Refund> {
+  summary: {
+    completedAmount: string;
+    /** Agreed but not yet sent - a liability worth chasing. */
+    pendingAmount: string;
+  };
+}

@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { OrderStatusBadge } from '@/components/ui/status-badge';
+import { OrderRefundsPanel } from '@/components/refunds/order-refunds-panel';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -192,6 +193,12 @@ export default function OrderDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          <OrderRefundsPanel
+            orderId={order.id}
+            orderStatus={order.status}
+            orderTotal={Number(order.totalAmount)}
+          />
         </div>
       </div>
     </div>
