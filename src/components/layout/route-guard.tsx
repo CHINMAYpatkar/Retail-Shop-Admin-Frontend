@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { ShieldAlert } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
-import { findRouteRule } from '@/lib/route-permissions';
+import { canAccessRoute, defaultRouteFor } from '@/lib/route-permissions';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -20,12 +20,11 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const admin = useAuthStore((s) => s.admin);
-  const hasPermission = useAuthStore((s) => s.hasPermission);
 
-  const rule = pathname ? findRouteRule(pathname) : undefined;
-  const permissionOk = !rule?.permission || hasPermission(rule.permission);
-  const roleOk = !rule?.roles || (admin ? rule.roles.includes(admin.roleName) : false);
-  const allowed = !rule || (permissionOk && roleOk);
+  // Shared with the landing logic, so "can I see this?" is answered the same
+  // way everywhere rather than reimplemented per call site.
+  const allowed = pathname ? canAccessRoute(pathname, admin) : true;
+  const fallbackRoute = defaultRouteFor(admin);
 
   React.useEffect(() => {
     if (!allowed) {
@@ -46,8 +45,10 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
           Your role ({admin?.roleName.replace('_', ' ')}) doesn&apos;t include access to this section. Contact a
           Super Admin if you believe this is a mistake.
         </p>
-        <Button variant="gold" onClick={() => router.push('/dashboard')}>
-          Back to dashboard
+        <Button variant="gold" onClick={() => router.push(fallbackRoute)}>
+          {/* Not always the dashboard: it is restricted to MANAGER and above,
+              so sending a STAFF account there would just block them again. */}
+          Go to {fallbackRoute === '/dashboard' ? 'dashboard' : fallbackRoute.replace('/', '')}
         </Button>
       </div>
     );

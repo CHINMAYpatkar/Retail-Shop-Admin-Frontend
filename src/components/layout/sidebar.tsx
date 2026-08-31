@@ -50,7 +50,16 @@ interface NavGroup {
 const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Overview',
-    items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
+    items: [
+      {
+        label: 'Dashboard',
+        href: '/dashboard',
+        icon: LayoutDashboard,
+        // Matches the backend's DashboardController, which is MANAGER and above.
+        // Showing STAFF a link whose data call 403s is worse than hiding it.
+        roles: ['SUPER_ADMIN', 'ADMIN', 'MANAGER'],
+      },
+    ],
   },
   {
     label: 'Catalog',

@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { api, unwrap } from '@/lib/api';
 import { getErrorMessage } from '@/lib/utils';
+import { defaultRouteFor } from '@/lib/route-permissions';
 import { getStoredRefreshToken, useAuthStore, type AdminUser } from '@/store/auth-store';
-import type { AdminUserRecord, Role } from '@/types/api';
+import type { AdminProfileResponse } from '@/types/api';
 
 interface LoginPayload {
   email: string;
@@ -18,36 +19,28 @@ interface TokenPair {
   refreshToken: string;
 }
 
-interface JwtPayload {
-  sub: string;
-  email?: string;
-  exp?: number;
-  iat?: number;
-}
-
-function decodeJwtSub(token: string): string {
-  const payload = JSON.parse(atob(token.split('.')[1])) as JwtPayload;
-  return payload.sub;
-}
-
 /**
- * The login/refresh response only carries tokens, not the admin's profile.
- * We decode `sub` (the admin id) from the access token, then fetch the
- * admin-user record plus the full roles list (which is where permissions
- * live) to assemble the AdminUser shape our store/UI need.
+ * The signed-in admin's profile and permissions, in one call.
+ *
+ * This used to fetch `/admin/users/:id` plus the full `/admin/roles` list.
+ * Both are gated to SUPER_ADMIN/ADMIN at the ROLE level on the backend, so a
+ * MANAGER or STAFF account got a 403 here and **could not log in at all** -
+ * login succeeded, then the profile fetch failed and the session never
+ * completed.
+ *
+ * `/auth/admin/me` needs only authentication, returns the flat permission list
+ * directly, and avoids handing every admin the entire permission matrix just so
+ * the client could find its own row.
  */
-async function fetchAdminProfile(adminId: string): Promise<AdminUser> {
-  const user = unwrap<AdminUserRecord>(await api.get(`/admin/users/${adminId}`));
-  const roles = unwrap<Role[]>(await api.get('/admin/roles'));
-  const role = roles.find((r) => r.id === user.role.id);
-  const permissions = role ? role.permissions.map((rp) => rp.permission.key) : [];
+async function fetchAdminProfile(): Promise<AdminUser> {
+  const profile = unwrap<AdminProfileResponse>(await api.get('/auth/admin/me'));
 
   return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    roleName: user.role.name,
-    permissions,
+    id: profile.id,
+    name: profile.name,
+    email: profile.email,
+    roleName: profile.role.name,
+    permissions: profile.permissions,
   };
 }
 
@@ -59,17 +52,18 @@ export function useLogin() {
     mutationFn: async (payload: LoginPayload) => {
       const { accessToken, refreshToken } = unwrap<TokenPair>(await api.post('/auth/admin/login', payload));
 
-      // Temporarily set the access token so the profile calls below are authenticated.
+      // Temporarily set the access token so the profile call below is authenticated.
       useAuthStore.getState().setAccessToken(accessToken);
-      const adminId = decodeJwtSub(accessToken);
-      const admin = await fetchAdminProfile(adminId);
+      const admin = await fetchAdminProfile();
 
       setSession(admin, accessToken, refreshToken);
       return admin;
     },
     onSuccess: (admin) => {
       toast.success(`Welcome back, ${admin.name.split(' ')[0]}`);
-      router.push('/dashboard');
+      // Role-aware: the dashboard is MANAGER and above on the backend, so a
+      // STAFF account is sent somewhere it can actually use.
+      router.push(defaultRouteFor(admin));
     },
     onError: (error) => {
       toast.error(getErrorMessage(error));
@@ -131,8 +125,7 @@ export async function restoreSession(): Promise<void> {
       await api.post('/auth/admin/refresh', { refreshToken }),
     );
     useAuthStore.getState().setAccessToken(accessToken);
-    const adminId = decodeJwtSub(accessToken);
-    const admin = await fetchAdminProfile(adminId);
+    const admin = await fetchAdminProfile();
     useAuthStore.getState().setSession(admin, accessToken, newRefreshToken);
   } catch {
     useAuthStore.getState().clear();

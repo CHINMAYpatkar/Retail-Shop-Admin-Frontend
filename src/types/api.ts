@@ -794,3 +794,20 @@ export interface PurchaseSummaryReport {
   byVendor: { id: string; name: string; amount: string; billCount: number }[];
   byMaterial: { id: string; name: string; baseUnit: string; quantity: string; amount: string }[];
 }
+
+/**
+ * Response from `GET /auth/admin/me` - the signed-in admin's own profile.
+ *
+ * Exists because `/admin/users/:id` and `/admin/roles` are both restricted to
+ * SUPER_ADMIN/ADMIN, so lower roles could not read their own profile and could
+ * not complete login.
+ */
+export interface AdminProfileResponse {
+  id: string;
+  name: string;
+  email: string;
+  lastLoginAt?: string | null;
+  role: { id: string; name: AdminRoleName; description?: string | null };
+  /** Flat permission keys granted by the admin's role. */
+  permissions: string[];
+}

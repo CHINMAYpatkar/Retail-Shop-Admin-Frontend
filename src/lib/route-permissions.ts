@@ -42,8 +42,51 @@ export const ROUTE_PERMISSIONS: RoutePermissionRule[] = [
   { prefix: '/blogs', permission: 'blogs.view' },
   { prefix: '/faqs', permission: 'faqs.view' },
   { prefix: '/settings', roles: ['SUPER_ADMIN', 'ADMIN'] },
+
+  // The backend's DashboardController is @Roles(SUPER_ADMIN, ADMIN, MANAGER).
+  // Without this rule a STAFF account could navigate to /dashboard and then
+  // watch its data call fail with a 403 - the frontend must mirror the API.
+  { prefix: '/dashboard', roles: ['SUPER_ADMIN', 'ADMIN', 'MANAGER'] },
 ];
 
 export function findRouteRule(pathname: string): RoutePermissionRule | undefined {
   return ROUTE_PERMISSIONS.find((rule) => pathname === rule.prefix || pathname.startsWith(`${rule.prefix}/`));
+}
+
+/** Whether an admin satisfies a route's rule. Used by the guard and the landing logic. */
+export function canAccessRoute(
+  pathname: string,
+  admin: { roleName: AdminRoleName; permissions: string[] } | null,
+): boolean {
+  const rule = findRouteRule(pathname);
+  if (!rule) return true; // unlisted routes are open to any authenticated admin
+  if (!admin) return false;
+
+  const permissionOk = !rule.permission || admin.permissions.includes(rule.permission);
+  const roleOk = !rule.roles || rule.roles.includes(admin.roleName);
+  return permissionOk && roleOk;
+}
+
+/**
+ * Preference order for where an admin lands. The first route they can actually
+ * access wins.
+ *
+ * Derived from the rules above rather than hardcoded per role, so it cannot
+ * drift when a role's permissions change. `/account` is last because every
+ * authenticated admin can reach it - it guarantees this never returns nothing.
+ */
+const LANDING_CANDIDATES = ['/dashboard', '/orders', '/support', '/products', '/account'] as const;
+
+/**
+ * Where to send an admin after login, or when they hit a route they cannot see.
+ *
+ * Sending everyone to /dashboard was wrong: the backend restricts the dashboard
+ * to MANAGER and above, so a STAFF account landed on a page whose only data
+ * call returned 403.
+ */
+export function defaultRouteFor(
+  admin: { roleName: AdminRoleName; permissions: string[] } | null,
+): string {
+  if (!admin) return '/login';
+  return LANDING_CANDIDATES.find((route) => canAccessRoute(route, admin)) ?? '/account';
 }
