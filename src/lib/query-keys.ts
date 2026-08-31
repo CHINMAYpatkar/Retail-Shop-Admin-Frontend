@@ -28,6 +28,7 @@ export const queryKeys = {
   margins: ['margins'] as const,
   expenses: (params?: object) => ['expenses', params] as const,
   refunds: (params?: object) => ['refunds', params] as const,
+  report: (name: string, params?: object) => ['reports', name, params] as const,
   orderRefunds: (orderId: string) => ['order-refunds', orderId] as const,
 
   // Phase 2

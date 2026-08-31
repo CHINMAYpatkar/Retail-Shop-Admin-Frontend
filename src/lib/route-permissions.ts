@@ -30,6 +30,7 @@ export const ROUTE_PERMISSIONS: RoutePermissionRule[] = [
   { prefix: '/margins', permission: 'costing.view', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { prefix: '/expenses', permission: 'expenses.view', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { prefix: '/refunds', permission: 'refunds.view', roles: ['SUPER_ADMIN', 'ADMIN'] },
+  { prefix: '/reports', permission: 'reports.view', roles: ['SUPER_ADMIN', 'ADMIN'] },
   { prefix: '/orders', permission: 'orders.view' },
   { prefix: '/reviews', permission: 'reviews.view' },
   { prefix: '/customers', permission: 'customers.view' },

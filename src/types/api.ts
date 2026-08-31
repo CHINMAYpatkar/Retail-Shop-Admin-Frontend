@@ -720,3 +720,77 @@ export interface RefundsResponse extends PaginatedResponse<Refund> {
     pendingAmount: string;
   };
 }
+
+export interface ProfitLossReport {
+  period: { fromDate: string | null; toDate: string | null };
+  revenue: { grossRevenue: string; refunds: string; netRevenue: string; orderCount: number };
+  cost: {
+    cogs: string;
+    /** Read this before trusting grossProfit - cost data is optional per item. */
+    coverage: {
+      itemsWithCost: number;
+      itemsTotal: number;
+      percent: string | null;
+      complete: boolean;
+    };
+  };
+  expenses: { total: string; byCategory: { category: ExpenseCategory; amount: string }[] };
+  profit: {
+    grossProfit: string;
+    netProfit: string;
+    grossMarginPercent: string | null;
+    netMarginPercent: string | null;
+  };
+  /** Not deducted above - money agreed but not yet sent. */
+  liabilities: { pendingRefunds: string };
+}
+
+export interface VendorPayablesReport {
+  vendors: {
+    id: string;
+    name: string;
+    isActive: boolean;
+    billed: string;
+    paid: string;
+    outstanding: string;
+    onAccount: string;
+    unpaidBillCount: number;
+    oldestUnpaidBillDate: string | null;
+    oldestUnpaidDays: number | null;
+    aging: { current: string; upTo30: string; upTo60: string; over60: string };
+  }[];
+  summary: {
+    vendorCount: number;
+    vendorsOwedCount: number;
+    totalOutstanding: string;
+    overdueOver60: string;
+  };
+}
+
+export interface StockValuationReport {
+  materials: {
+    id: string;
+    name: string;
+    code?: string | null;
+    baseUnit: MeasurementUnit;
+    stockQuantity: string;
+    reorderLevel?: string | null;
+    avgCostPerUnit?: string | null;
+    /** Null when the material has no recorded cost - not valued at zero. */
+    stockValue: string | null;
+    isLowStock: boolean;
+  }[];
+  summary: {
+    materialCount: number;
+    totalValue: string;
+    unvaluedCount: number;
+    lowStockCount: number;
+  };
+}
+
+export interface PurchaseSummaryReport {
+  period: { fromDate: string | null; toDate: string | null };
+  summary: { totalSpend: string; billCount: number };
+  byVendor: { id: string; name: string; amount: string; billCount: number }[];
+  byMaterial: { id: string; name: string; baseUnit: string; quantity: string; amount: string }[];
+}

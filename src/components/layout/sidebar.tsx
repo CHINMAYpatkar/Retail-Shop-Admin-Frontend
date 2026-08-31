@@ -29,6 +29,7 @@ import {
   TrendingUp,
   Wallet,
   Undo2,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth-store';
@@ -111,6 +112,7 @@ const NAV_GROUPS: NavGroup[] = [
       },
       { label: 'Expenses', href: '/expenses', icon: Wallet, roles: ['SUPER_ADMIN', 'ADMIN'] },
       { label: 'Refunds', href: '/refunds', icon: Undo2, roles: ['SUPER_ADMIN', 'ADMIN'] },
+      { label: 'Reports', href: '/reports', icon: BarChart3, roles: ['SUPER_ADMIN', 'ADMIN'] },
     ],
   },
   {
