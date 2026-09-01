@@ -9,7 +9,16 @@ import {
   Tooltip,
   XAxis,
 } from 'recharts';
-import { IndianRupee, Package, ShoppingBag, Users, AlertTriangle, Star, LifeBuoy } from 'lucide-react';
+import {
+  IndianRupee,
+  Package,
+  ShoppingBag,
+  Users,
+  AlertTriangle,
+  Star,
+  LifeBuoy,
+  TrendingUp,
+} from 'lucide-react';
 import { useDashboardSummary } from '@/hooks/use-dashboard';
 import { PageHeader } from '@/components/ui/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,11 +34,14 @@ function StatCard({
   icon: Icon,
   label,
   value,
+  hint,
   delay,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string;
+  /** Small line under the value - the caveat or the definition. */
+  hint?: string;
   delay: number;
 }) {
   return (
@@ -46,6 +58,7 @@ function StatCard({
           <div>
             <p className="text-xs text-ink-500">{label}</p>
             <p className="font-data text-lg font-semibold text-ink-900">{value}</p>
+            {hint && <p className="mt-0.5 text-xs text-ink-400">{hint}</p>}
           </div>
         </CardContent>
       </Card>
@@ -68,8 +81,34 @@ export default function DashboardPage() {
       <PageHeader title="Dashboard" description="Last 30 days at a glance" />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={IndianRupee} label="Revenue (30d)" value={formatCurrency(data.revenueLast30Days)} delay={0} />
-        <StatCard icon={ShoppingBag} label="Orders (30d)" value={String(data.ordersLast30Days)} delay={0.04} />
+        {/* Delivered value less completed refunds - matches the reports P&L.
+            This card previously showed every non-cancelled order as "revenue",
+            which on COD overstated money actually received. */}
+        <StatCard
+          icon={IndianRupee}
+          label="Revenue (30d)"
+          value={formatCurrency(Number(data.revenueLast30Days))}
+          hint={
+            Number(data.refundsLast30Days) > 0
+              ? `after ${formatCurrency(Number(data.refundsLast30Days))} refunded`
+              : 'delivered orders'
+          }
+          delay={0}
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Booked (30d)"
+          value={formatCurrency(Number(data.bookedLast30Days))}
+          hint="incl. not yet delivered"
+          delay={0.02}
+        />
+        <StatCard
+          icon={ShoppingBag}
+          label="Orders (30d)"
+          value={String(data.ordersLast30Days)}
+          hint={`${data.deliveredOrdersLast30Days} delivered`}
+          delay={0.04}
+        />
         <StatCard icon={Package} label="Active products" value={String(data.totalProducts)} delay={0.08} />
         <StatCard icon={Users} label="Customers" value={String(data.totalCustomers)} delay={0.12} />
       </div>

@@ -388,8 +388,20 @@ export interface InvoiceSettings {
 }
 
 export interface DashboardSummary {
-  revenueLast30Days: number;
+  /**
+   * Net revenue: delivered order value less completed refunds, over 30 days.
+   * Same definition as the reports P&L - the two used to disagree.
+   */
+  revenueLast30Days: string | number;
+  grossRevenueLast30Days: string | number;
+  refundsLast30Days: string | number;
+  /** Delivered orders only - the count behind the revenue figure. */
+  deliveredOrdersLast30Days: number;
+  /** All non-cancelled order value: the pipeline, not money in hand. */
+  bookedLast30Days: string | number;
   ordersLast30Days: number;
+  /** Agreed but not yet sent. A liability, not deducted from revenue. */
+  pendingRefundAmount: string | number;
   ordersByStatus: Record<string, number>;
   totalCustomers: number;
   totalProducts: number;
