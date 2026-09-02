@@ -1,13 +1,18 @@
 /**
  * Maps dashboard route prefixes to the access rule required to view them.
  * A rule can require a specific permission key, restrict to certain roles,
- * or both. Routes not listed here (e.g. /dashboard, /account, /media,
- * /support) are open to any authenticated admin - which mirrors the backend
- * exactly: MediaController and SupportAdminController only use RolesGuard
- * with all four roles allowed, so there's no narrower permission to enforce
- * on the frontend either. Everything else is locked down by the same
- * permission keys the backend seeds and enforces server-side, so the
- * frontend and API can never disagree about who can see what.
+ * or both. Routes not listed here (e.g. /account, /support) are open to any
+ * authenticated admin - which mirrors the backend exactly: those controllers
+ * use RolesGuard with all four roles allowed, so there is no narrower
+ * permission to enforce on the frontend either. Everything else is locked
+ * down by the same permission keys the backend seeds and enforces
+ * server-side, so the frontend and API can never disagree about who can see
+ * what.
+ *
+ * That last sentence is the whole point of this file, and it is a claim that
+ * has to be re-checked whenever a backend guard changes. It stopped being true
+ * once MediaController gained a PermissionsGuard, and the symptom would have
+ * been a STAFF account browsing to a page whose every request 403s.
  */
 import type { AdminRoleName } from '@/types/api';
 
@@ -42,6 +47,12 @@ export const ROUTE_PERMISSIONS: RoutePermissionRule[] = [
   { prefix: '/blogs', permission: 'blogs.view' },
   { prefix: '/faqs', permission: 'faqs.view' },
   { prefix: '/settings', roles: ['SUPER_ADMIN', 'ADMIN'] },
+
+  // MediaController requires media.view and no longer lists STAFF. MANAGER is
+  // granted media.view/create/update (catalogue work needs the library) but not
+  // media.delete, because a MediaAsset is also the attachment on a purchase
+  // bill, vendor payment or expense.
+  { prefix: '/media', permission: 'media.view' },
 
   // The backend's DashboardController is @Roles(SUPER_ADMIN, ADMIN, MANAGER).
   // Without this rule a STAFF account could navigate to /dashboard and then
