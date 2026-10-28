@@ -24,6 +24,20 @@ import { FormField } from '@/components/ui/form-field';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PageSpinner } from '@/components/ui/spinner';
+import {
+  BrandingSection,
+  AnnouncementSection,
+  UspStripSection,
+  HomeSectionsSection,
+} from '@/components/settings/storefront-sections';
+import { FooterSection } from '@/components/settings/footer-section';
+import type {
+  BrandingFormValues,
+  AnnouncementFormValues,
+  UspStripFormValues,
+  HomeSectionsFormValues,
+  FooterFormValues,
+} from '@/lib/validations/settings.schema';
 
 const BUSINESS_INFO_DEFAULTS: BusinessInfoFormValues = {
   businessName: '',
@@ -307,11 +321,57 @@ export default function SettingsPage() {
     ...(settings.invoice_settings as Partial<InvoiceSettingsFormValues>),
   };
 
+  // Storefront chrome. Defaults matter more here than elsewhere: these keys may
+  // not exist at all on a shop that has never set them, and react-hook-form
+  // needs a defined shape for every field it renders - an undefined array turns
+  // a field list into a crash rather than an empty state.
+  const branding: BrandingFormValues = {
+    logoUrl: '',
+    faviconUrl: '',
+    wordmark: '',
+    ...(settings.branding as Partial<BrandingFormValues>),
+  };
+
+  const announcement: AnnouncementFormValues = {
+    enabled: false,
+    message: '',
+    linkLabel: '',
+    linkUrl: '',
+    ...(settings.announcement as Partial<AnnouncementFormValues>),
+  };
+
+  const uspStrip: UspStripFormValues = {
+    enabled: true,
+    items: [],
+    ...(settings.usp_strip as Partial<UspStripFormValues>),
+  };
+
+  // The two sections the home page looks for. Seeded here when absent so the
+  // form always offers both, rather than showing nothing on a fresh shop.
+  const savedSections = (settings.home_sections as Partial<HomeSectionsFormValues>)?.sections ?? [];
+  const homeSections: HomeSectionsFormValues = {
+    sections: ['featured', 'story'].map(
+      (key) =>
+        savedSections.find((section) => section.key === key) ?? {
+          key,
+          enabled: true,
+          heading: '',
+          subheading: '',
+        },
+    ),
+  };
+
+  const footer: FooterFormValues = {
+    columns: [],
+    note: '',
+    ...(settings.footer as Partial<FooterFormValues>),
+  };
+
   return (
     <div>
       <PageHeader
         title="Settings"
-        description="Business information, social links, SEO defaults, and invoicing"
+        description="Business information, storefront appearance, SEO defaults, and invoicing"
       />
       <p className="mb-4 -mt-2 text-xs text-ink-500">
         SMTP is configured through the backend&apos;s environment variables rather than here. Its live status and a
@@ -324,6 +384,15 @@ export default function SettingsPage() {
         <SeoDefaultsSection initial={seoDefaults} />
         <InvoiceSettingsSection initial={invoiceSettings} />
         <SmtpStatusSection />
+
+        <BrandingSection initial={branding} />
+        <AnnouncementSection initial={announcement} />
+        <UspStripSection initial={uspStrip} />
+        <HomeSectionsSection initial={homeSections} />
+        {/* Full width: a column of links beside another column reads badly. */}
+        <div className="lg:col-span-2">
+          <FooterSection initial={footer} />
+        </div>
       </div>
     </div>
   );
