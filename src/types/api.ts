@@ -118,13 +118,20 @@ export type OrderStatus =
   | 'PLACED'
   | 'CONFIRMED'
   | 'PROCESSING'
+  /** At least one line is out of stock and the order is being held for it. */
+  | 'AWAITING_STOCK'
   | 'PACKED'
   | 'SHIPPED'
+  /** Part of the order is on its way; the rest follows when stock arrives. */
+  | 'PARTIALLY_SHIPPED'
   | 'OUT_FOR_DELIVERY'
   | 'DELIVERED'
   | 'CANCELLED'
   | 'RETURNED'
   | 'REFUNDED';
+
+/** Where one LINE has got to, which can differ from the order's own status. */
+export type OrderItemStatus = 'PENDING' | 'AWAITING_STOCK' | 'SHIPPED' | 'DELIVERED';
 
 export interface OrderItemRecord {
   id: string;
@@ -133,7 +140,19 @@ export interface OrderItemRecord {
   unitPrice: string | number;
   quantity: number;
   totalPrice: string | number;
+  fulfilmentStatus: OrderItemStatus;
+  expectedAvailabilityDate?: string | null;
+  availabilityNote?: string | null;
   product?: { id: string; name: string; slug: string };
+}
+
+/** One cash collection against an order. A split delivery produces several. */
+export interface OrderPaymentRecord {
+  id: string;
+  amount: string | number;
+  collectedAt: string;
+  note?: string | null;
+  recordedBy?: string | null;
 }
 
 export interface OrderStatusHistoryRecord {
@@ -149,7 +168,7 @@ export interface Order {
   orderNumber: string;
   status: OrderStatus;
   paymentMethod: 'COD' | 'ONLINE';
-  paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+  paymentStatus: 'PENDING' | 'PARTIALLY_PAID' | 'PAID' | 'FAILED' | 'PARTIALLY_REFUNDED' | 'REFUNDED';
   subtotal: string | number;
   taxAmount: string | number;
   shippingAmount: string | number;
@@ -160,7 +179,9 @@ export interface Order {
   createdAt: string;
   customer: { id: string; name?: string | null; email: string };
   address?: Address;
+  holdForStock: boolean;
   items: OrderItemRecord[];
+  payments?: OrderPaymentRecord[];
   statusHistory: OrderStatusHistoryRecord[];
   _count?: { items: number };
 }
